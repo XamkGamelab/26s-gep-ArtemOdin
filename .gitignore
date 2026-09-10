@@ -1,3 +1,7 @@
+/[Oo]ut/
+/[Bb]uild/
+.vs/
+
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
