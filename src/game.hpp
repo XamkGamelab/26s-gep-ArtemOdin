@@ -2,6 +2,7 @@
 
 struct SDL_Window;
 struct SDL_Renderer;
+struct SDL_Texture;
 
 namespace gep 
 {
@@ -19,7 +20,8 @@ namespace gep
 	private:
 		SDL_Window* window;
 		SDL_Renderer* renderer;
-			
+		SDL_Texture* image;
+		
 		
 		
 	};
