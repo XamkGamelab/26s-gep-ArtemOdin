@@ -1,8 +1,6 @@
 #pragma once
 
-struct SDL_Window;
-struct SDL_Renderer;
-struct SDL_Texture;
+#include <SDL3/SDL.h>
 
 namespace gep 
 {
@@ -21,7 +19,8 @@ namespace gep
 		SDL_Window* window;
 		SDL_Renderer* renderer;
 		SDL_Texture* image;
-		
+		SDL_GLContext context;
+
 		
 		
 	};

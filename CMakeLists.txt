@@ -2,11 +2,10 @@
 # CMakeLists.txt
 
 cmake_minimum_required(VERSION 3.31)
-project("GEP")
+project(GEP VERSION 0.1.0 LANGUAGES C CXX)
 
-# Ensure the runtime executable and library files are outputted to the same directory
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 
-add_subdirectory("vendor")
-add_subdirectory("src")
+add_subdirectory(vendor EXCLUDE_FROM_ALL)
+add_subdirectory(src)

@@ -23,27 +23,27 @@ namespace gep::input
 		input_system operator=(const input_system&) = delete;
 		input_system operator=(const input_system&&) = delete;
 
-		auto ProcessEvent(const SDL_Event&) -> void;
-		auto Update() -> void;
-		auto IsKeyDown(SDL_Keycode key) -> bool;
-		auto IsKeyUp(SDL_Keycode key) -> bool;
-		auto IsKeyPressed(SDL_Keycode key) -> bool;
-		auto IsMouseDown(unsigned int mouseBtnIdx) -> bool;
-		auto IsMouseUp(unsigned int mouseBtnIdx) -> bool;
-		auto IsMousePressed(unsigned int mouseBtnIdx) -> bool;
+		auto ProcessEvent(const SDL_Event&) noexcept -> void;
+		auto Update() noexcept -> void;
+		auto IsKeyDown(SDL_Keycode key) const noexcept -> bool;
+		auto IsKeyUp(SDL_Keycode key) const noexcept -> bool;
+		auto IsKeyPressed(SDL_Keycode key) const noexcept -> bool;
+		auto IsMouseDown(unsigned int mouseBtnIdx) const noexcept -> bool;
+		auto IsMouseUp(unsigned int mouseBtnIdx) const noexcept -> bool;
+		auto IsMousePressed(unsigned int mouseBtnIdx) const noexcept -> bool;
 
 	private:
 		input_system() = default;
 		~input_system() = default;
 
-		auto Clear() -> void;
+		auto Clear() noexcept -> void;
 
-		std::unordered_set<SDL_Keycode> pressedDown;
-		std::unordered_set<SDL_Keycode> pressedUp;
-		std::unordered_set<SDL_Keycode> pressedNow;
-		std::unordered_set<unsigned int> mousePressedDown;
-		std::unordered_set<unsigned int> mousePressedUp;
-		std::unordered_set<unsigned int> mousePressedNow;
+		unordered_set<SDL_Keycode> pressedDown;
+		unordered_set<SDL_Keycode> pressedUp;
+		unordered_set<SDL_Keycode> pressedNow;
+		unordered_set<unsigned int> mousePressedDown;
+		unordered_set<unsigned int> mousePressedUp;
+		unordered_set<unsigned int> mousePressedNow;
 
 	};
 }
