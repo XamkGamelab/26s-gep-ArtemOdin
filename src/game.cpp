@@ -16,6 +16,9 @@
 
 #include "input/input_system.hpp"
 #include "time/time_system.hpp"
+#include "files/file_loader.hpp"
+#include "shaders/shader.hpp"
+#include "renderers/renderer2d.hpp"
 
 auto gep::game::init() noexcept -> bool 
 {
@@ -26,13 +29,12 @@ auto gep::game::init() noexcept -> bool
 		return false;
 	}
 
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-	window = SDL_CreateWindow("OpenGL Window", 1280, 720, SDL_WINDOW_OPENGL);
+	window = SDL_CreateWindow("OpenGL Window", 1280, 720, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
 	if (window == nullptr) {
 		SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
@@ -42,35 +44,34 @@ auto gep::game::init() noexcept -> bool
 
 	context = SDL_GL_CreateContext(window);
 
-	if (context == nullptr) {
-		SDL_LogError(SDL_LOG_CATEGORY_RENDER,
+	auto version = gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
+
+	if (version == 0) {
+		SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
 			"OPENGL CONTEXT CREATION FAILED %s", SDL_GetError());
 		return false;
 	}
 
 
-	if (gladLoadGL(SDL_GL_GetProcAddress) == 0) {
-		SDL_Log("GLAD LOAD ERROR");
-		return false;
-	}
+	int32_t major, minor, profile;
+	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
+	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
+	SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &profile);
 
-	renderer = SDL_CreateRenderer(window, nullptr);
+	SDL_Log("OpenGL version %i %i - Profile: %i ", major, minor, profile);
+	SDL_Log("Glad version: %i %i", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+	
 
-	if (renderer == nullptr) {
-		SDL_LogError(SDL_LOG_CATEGORY_RENDER,
-			"SDL RENDERER CREATION FAILED %s", SDL_GetError());
-		return false;
-	}
-
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-	SDL_RenderClear(renderer);
-	SDL_RenderPresent(renderer);
-
-	image = IMG_LoadTexture(renderer, "assets/awesomeface.png");
-
-	if (!image)
+	if (!shaders::shader::instance().Load("assets/shaders/vertex.glsl", 
+		"assets/shaders/frag.glsl"))
 	{
-		SDL_Log("IMAGE LOAD ERROR: %s", SDL_GetError());
+		shutdown();
+		return false;
+	}
+
+	if (!renderers::renderer2d::instance().Load())
+	{
+		shutdown();
 		return false;
 	}
 	
@@ -87,6 +88,7 @@ auto gep::game::run() -> void
 
 
 	bool IsRunning = true;
+
 
 	int32_t width;
 	int32_t height;
@@ -109,9 +111,14 @@ auto gep::game::run() -> void
 
 	auto& input_system = input::input_system::instance();
 
+	auto& shader = shaders::shader::instance();
+
+	auto& renderer2d = renderers::renderer2d::instance();
+
 	auto& time_system = time::time_system::instance();
 
 	time_system.Init();
+
 
 	while (IsRunning) 
 	{
@@ -172,38 +179,14 @@ auto gep::game::run() -> void
 			
 
 		}
-		
 
-		SDL_RenderClear(renderer);
+		renderer2d.Begin();
 
-		if (image)
-		{
-			float deltaTime = time_system.GetDeltaTime();
+		renderer2d.DrawQuad();
 
-			if (input_system.IsKeyPressed(SDLK_W))
-				imageY -= moveSpeed * deltaTime;
-			if (input_system.IsKeyPressed(SDLK_A))
-				imageX -= moveSpeed * deltaTime;
-			if (input_system.IsKeyPressed(SDLK_S))
-				imageY += moveSpeed * deltaTime;
-			if (input_system.IsKeyPressed(SDLK_D))
-				imageX += moveSpeed * deltaTime;
+		renderer2d.End(window);
 
-
-			imageX = std::clamp(imageX, 0.0f, static_cast<float>(width - imageSize));
-
-			imageY = std::clamp(imageY, 0.0f, static_cast<float>(height - imageSize));
-
-			SDL_FRect destinationRect;
-			destinationRect.h = imageSize;
-			destinationRect.w = imageSize;
-			destinationRect.x = imageX;
-			destinationRect.y = imageY;
-
-			SDL_RenderTexture(renderer, image, nullptr, &destinationRect);
-		}
-
-		SDL_RenderPresent(renderer);
+		//SDL_RenderPresent(renderer);
 	}
 
 	shutdown();
@@ -211,6 +194,13 @@ auto gep::game::run() -> void
 
 auto gep::game::shutdown() noexcept -> void
 {
+	shaders::shader::instance().Delete();
+	renderers::renderer2d::instance().Delete();
+
+	if (context != nullptr) {
+		SDL_GL_DestroyContext(context);
+	}
+
 	if (window != nullptr) {
 		SDL_DestroyWindow(window);
 	}
@@ -219,9 +209,6 @@ auto gep::game::shutdown() noexcept -> void
 		SDL_DestroyRenderer(renderer);
 	}
 
-	if (context != nullptr) {
-		SDL_GL_DestroyContext(context);
-	}
 
 	if (image != nullptr) {
 		SDL_DestroyTexture(image);
@@ -229,5 +216,4 @@ auto gep::game::shutdown() noexcept -> void
 
 	SDL_Quit();
 }
-
 

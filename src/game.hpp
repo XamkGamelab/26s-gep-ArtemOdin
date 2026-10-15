@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
+#include "shaders/shader.hpp"
 
 namespace gep 
 {
@@ -19,9 +20,7 @@ namespace gep
 		SDL_Window* window;
 		SDL_Renderer* renderer;
 		SDL_Texture* image;
-		SDL_GLContext context;
-
-		
+		SDL_GLContext context;		
 		
 	};
 }
