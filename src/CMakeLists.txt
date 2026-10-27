@@ -6,9 +6,9 @@ add_executable(GEP
 	game.cpp
 	input/input_system.cpp
     time/time_system.cpp
-	files/file_loader.cpp
-	shaders/shader.cpp
-	renderers/renderer2d.cpp
+	renderer/shader.cpp
+	renderer/renderer_2d.cpp
+	renderer/texture_2d.cpp
 
 )
 

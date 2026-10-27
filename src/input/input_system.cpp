@@ -1,71 +1,66 @@
 #include "input_system.hpp"
 #include <SDL3/SDL_events.h>
 
-
-auto gep::input::input_system::ProcessEvent(const SDL_Event& event) noexcept -> void
+auto gep::input::input_system::update() noexcept -> void
 {
-	switch (event.type) {
+	keysDown.clear();
+	keysUp.clear();
+	mouseDown.clear();
+	mouseUp.clear();
+}
+
+auto gep::input::input_system::process_input(const SDL_Event& ev) noexcept -> void
+{
+	auto keycode = ev.key.key;
+	auto mouse_button_index = ev.button.button;
+	switch (ev.type)
+	{
 	case SDL_EVENT_KEY_DOWN:
-		pressedDown.insert(event.key.key);
-		pressedNow.insert(event.key.key);
+		keysDown.insert(keycode);
+		keysPressed.insert(keycode);
 		break;
 	case SDL_EVENT_KEY_UP:
-		pressedUp.insert(event.key.key);
-		pressedNow.erase(event.key.key);
+		keysUp.insert(keycode);
+		keysPressed.erase(keycode);
 		break;
 	case SDL_EVENT_MOUSE_BUTTON_DOWN:
-		mousePressedDown.insert(event.button.button);
-		mousePressedNow.insert(event.button.button);
+		mouseDown.insert(mouse_button_index);
+		mousePressed.insert(mouse_button_index);
 		break;
 	case SDL_EVENT_MOUSE_BUTTON_UP:
-		mousePressedUp.insert(event.button.button);
-		mousePressedNow.erase(event.button.button);
+		mouseUp.insert(mouse_button_index);
+		mousePressed.erase(mouse_button_index);
 		break;
+	default: break;
 	}
-	
 }
 
-
-auto gep::input::input_system::Update() noexcept -> void
+auto gep::input::input_system::is_key_down(uint32_t keycode) const noexcept -> bool
 {
-	Clear();
+	return keysDown.contains(keycode);
 }
 
-auto gep::input::input_system::Clear() noexcept -> void
+auto gep::input::input_system::is_key_pressed(uint32_t keycode) const noexcept -> bool
 {
-	pressedDown.clear();
-	pressedUp.clear();
-	mousePressedDown.clear();
-	mousePressedUp.clear();
-
-};
-
-auto gep::input::input_system::IsKeyDown(SDL_Keycode key) const noexcept -> bool
-{
-	return pressedDown.contains(key);
+	return keysPressed.contains(keycode);
 }
 
-auto gep::input::input_system::IsKeyUp(SDL_Keycode key) const noexcept -> bool
+auto gep::input::input_system::is_key_up(uint32_t keycode) const noexcept -> bool
 {
-	return pressedUp.contains(key);
+	return keysUp.contains(keycode);
 }
 
-auto gep::input::input_system::IsKeyPressed(SDL_Keycode key) const noexcept -> bool
+auto gep::input::input_system::is_mouse_down(uint8_t mouse_button_index) const noexcept -> bool
 {
-	return pressedNow.contains(key);
+	return mouseDown.contains(mouse_button_index);
 }
 
-auto gep::input::input_system::IsMouseDown(unsigned int mouseBtnIdx) const noexcept -> bool
+auto gep::input::input_system::is_mouse_pressed(uint8_t mouse_button_index) const noexcept -> bool
 {
-	return mousePressedDown.contains(mouseBtnIdx);
+	return mousePressed.contains(mouse_button_index);
 }
 
-auto gep::input::input_system::IsMouseUp(unsigned int mouseBtnIdx) const noexcept -> bool
+auto gep::input::input_system::is_mouse_up(uint8_t mouse_button_index) const noexcept -> bool
 {
-	return mousePressedUp.contains(mouseBtnIdx);
-}
-
-auto gep::input::input_system::IsMousePressed(unsigned int mouseBtnIdx) const noexcept -> bool
-{
-	return mousePressedNow.contains(mouseBtnIdx);
+	return mouseUp.contains(mouse_button_index);
 }
